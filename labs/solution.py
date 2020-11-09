@@ -166,10 +166,13 @@ class Effect(Entity):
     @abstractmethod
     def use_effect(self):
         self.max_hit_points()
-        if self.max_hit_points < self.hit_points:
-            self.hit_points = self.max_hit_points
-        else:
-            raise HpError(int(self.hit_points))
+        try:
+            if self.max_hit_points < self.hit_points:
+                self.hit_points = self.max_hit_points
+            else:
+                raise HpError(int(self.hit_points))
+        except HpError as e:
+            pass
 
 
 class Debility(Effect):
