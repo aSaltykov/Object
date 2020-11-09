@@ -106,7 +106,13 @@ class HealthRecovery(AbsAction):
     @classmethod
     def use(cls, level, knight):
         level.score += 1
-        knight.hit_points = knight.max_hit_points
+        try:
+            if knight.max_hit_points < knight.hit_points:
+                knight.hit_points = knight.max_hit_point
+            else:
+                raise HpError(int(knight.hit_points))
+        except HpError as e:
+            pass
 
 
 class Entity(AbstractObj):
@@ -195,7 +201,6 @@ class Effect(Entity):
     @experience.setter
     def experience(self, value):
         self.basic.experience = value
-
 
     @abstractmethod
     def use_effect(self):
