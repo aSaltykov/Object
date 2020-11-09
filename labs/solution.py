@@ -1,6 +1,33 @@
 from abc import ABC,abstractmethod
 
 
+class Game:
+    obj = []
+    level = 0
+    score = 0
+    _game = True
+    map = None
+    mini_map = True
+    knight = None
+    gen_level = None
+    gen_knight = None
+    member = set()
+
+    def notice(self, message):
+        for el in self.member:
+            el.update(message)
+
+    def knight_create(self):
+        self.knight = self.gen_knight.create()
+
+    def start_new_game(self):
+        self.knight_create()
+        self.level = 1
+        self.score = 0
+        self.notice({"start": "new game"})
+        pass
+
+
 class AbstractObj(ABC):
 
     def __init__(self):
@@ -14,20 +41,20 @@ class AbstractObj(ABC):
 class AbsAction(ABC):
     @classmethod
     @abstractmethod
-    def use(cls, level, hero):
+    def use(cls, level, knight):
         pass
 
 
 class NextLevel(AbsAction):
     @classmethod
-    def use(cls, level, hero):
+    def use(cls, level, knight):
         level.next_level()
 
 
 
 class Interactive(ABC):
     @abstractmethod
-    def interact(self, hero, engine):
+    def interact(self, knight, engine):
         pass
 
 
@@ -75,6 +102,13 @@ class MapGenerate(ObjGenerate):
         return {(1, 1): "Knight"}
 
 
+class HealthRecovery(AbsAction):
+    @classmethod
+    def use(cls, level, knight):
+        level.score += 1
+        knight.hit_points = knight.max_hit_points
+
+
 class Entity(AbstractObj):
 
     def __init__(self,stats,position):
@@ -117,8 +151,8 @@ class Mate(AbstractObj, Interactive):
         self.position = position
         self.action = action
 
-    def interact(self, hero, engine):
-        self.action(engine, hero)
+    def interact(self, knight, engine):
+        self.action(engine, knight)
 
     def draw(self,display):
         pass
