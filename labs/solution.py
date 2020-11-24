@@ -12,6 +12,7 @@ class Game:
     gen_level = None
     gen_knight = None
     member = set()
+    _object_size = 1
 
     def notice(self, message):
         for el in self.member:
@@ -28,14 +29,36 @@ class Game:
         pass
 
 
-class AbstractObj(ABC):
-
-    def __init__(self):
+class AbstractFactory(ABC):
+    _object = None
+    
+    @abstractmethod
+    def create(self):
         pass
+    
+
+class HeroFactory(AbstractFactory):
+    def create(self):
+        object = Lib.textures["knight"]["object"]
+        return Knight(STATS, object)
+    
+
+class AbstractObj(ABC):
+    @abstractmethod
+    def __init__(self):
+        self._object = []
 
     @abstractmethod
     def draw(self,display):
         pass
+    
+    @property
+    def object(self):
+        return self._object[0]
+    
+    @object.setter
+    def object(self, value):
+        self._object = value if isinstance(value, list) else [value]
 
 
 class AbsAction(ABC):
@@ -49,7 +72,6 @@ class NextLevel(AbsAction):
     @classmethod
     def use(cls, level, knight):
         level.next_level()
-
 
 
 class Interactive(ABC):
@@ -117,26 +139,29 @@ class HealthRecovery(AbsAction):
 
 class Entity(AbstractObj):
 
-    def __init__(self,stats,position):
+    def __init__(self,stats,position,image):
+        self._object = image 
         self.hit_points = 0
         self.max_hit_points = 0
         self.stats = stats
         self.position = position
+        self.max_()
+        self.hit_points = self.max_hit_points
 
     def draw(self,display):
         pass
 
-    def max_hit_points(self):
+    def max_(self):
         self.max_hit_points = 8 + self.stats["stamina"] + self.stats["power"]
         if self.max_hit_points < self.hit_points:
             self.hit_points = self.max_hit_points
 
 
 class Knight(Entity):
-    def __init__(self,stats):
+    def __init__(self,stats, image):
         self.level = 1
         self.experience = 0
-        super().__init__(stats, [1, 1])
+        super().__init__(image, stats, [1, 1])
 
     @property
     def max_experience(self):
@@ -145,15 +170,18 @@ class Knight(Entity):
 
     def level(self):
         while self.experience >= self.max_experience:
-            self.max_hit_points()
+            self.max_()
             self.hit_points = self.max_hit_points
             self.level += 1
             self.stats["stamina"] += 3
             self.stats["power"] += 3
             yield "Level up"
 
+
 class Mate(AbstractObj, Interactive):
-    def __init__(self, position, action):
+    
+    def __init__(self, position, action, image):
+        self._object = image
         self.position = position
         self.action = action
 
@@ -163,12 +191,12 @@ class Mate(AbstractObj, Interactive):
     def draw(self,display):
         pass
 
+
 class Effect(Entity):
 
     def __init__(self,basic):
         self.basic = basic
         self.use_effect()
-
 
     @property
     def hit_points(self):
@@ -235,4 +263,35 @@ class Violent(Effect):
         self.stats["intellect"] -= 2
         self.stats["stamina"] += 5
         super().use_effect()
+        
+        
+class Lib:
+    class Getter:
+        def __init__(self, name):
+            self.name = name
+
+        def __get__(self, instance, host):
+            return host._obj.get(self.name, dict())
+
+    _obj = dict()
+    _generate = {"object": None, "action": None}
+    mate = Getter("mate")
+    textures = Getter("textures")
+
+    @classmethod
+    def set_generate(cls, generate_obj =None, generate_action = None):
+        cls._generate["object"] = generate_obj
+        cls._generate["action"] = generate_action
+
+    @classmethod
+    def clear(cls):
+        cls._obj = dict()
+
+
+STATS = {
+    "power": 10,
+    "stamina": 10,
+    "intellect": 5
+}
+
 
