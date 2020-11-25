@@ -30,17 +30,16 @@ class Game:
 
 
 class AbstractFactory(ABC):
-    _object = None
-    
+
     @abstractmethod
     def create(self):
         pass
     
 
-class HeroFactory(AbstractFactory):
+class KnightFactory(AbstractFactory):
     def create(self):
-        object = Lib.textures["knight"]["object"]
-        return Knight(STATS, object)
+        obj = Lib.textures["knight"]["object"]
+        return Knight(STATS, obj)
     
 
 class AbstractObj(ABC):
@@ -279,7 +278,7 @@ class Lib:
     textures = Getter("textures")
 
     @classmethod
-    def set_generate(cls, generate_obj =None, generate_action = None):
+    def set_generate(cls, generate_obj=None, generate_action=None):
         cls._generate["object"] = generate_obj
         cls._generate["action"] = generate_action
 
@@ -288,10 +287,19 @@ class Lib:
         cls._obj = dict()
 
 
+def create_game():
+    obj_create = Game()
+    obj_create.gen_knight = KnightFactory()
+    obj_create.start_new_game()
+    pass
+    return obj_create
+
+
 STATS = {
     "power": 10,
     "stamina": 10,
     "intellect": 5
 }
+
 
 
