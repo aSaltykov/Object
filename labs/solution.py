@@ -1,28 +1,30 @@
 from abc import ABC,abstractmethod
 
 
-class SingleTone:
+class Singleton:
     __instance = None
 
-    def __new__(cls, name):
-        if SingleTone.__instance:
-            SingleTone.__instance = object.__new__(cls)
-        SingleTone.__instance.name = name
-        return SingleTone.__instance
+    def __new__(cls, *val):
+        if Singleton.__instance is None:
+            Singleton.__instance = object.__new__(cls)
+        Singleton.__instance.val = val
+
+        return Singleton.__instance
 
 
-class Game(SingleTone):
-    obj = []
-    level = 0
-    score = 0
-    _game = True
-    map = None
-    mini_map = True
-    knight = None
-    gen_level = None
-    gen_knight = None
-    member = set()
-    _object_size = 1
+class Game(Singleton):
+    def __init__(self):
+        self.obj = []
+        self.level = 0
+        self.score = 0
+        self._game = True
+        self.map = None
+        self.mini_map = True
+        self.knight = None
+        self.gen_level = None
+        self.gen_knight = None
+        self.member = set()
+        self._object_size = 1
 
     def notice(self, message):
         for el in self.member:
@@ -39,14 +41,7 @@ class Game(SingleTone):
         pass
 
 
-class AbstractKnightFactory(ABC):
-
-    @abstractmethod
-    def create(self):
-        pass
-    
-
-class KnightFactory(AbstractFactory):
+class KnightFactory:
 
     def create(self):
         obj = Lib.textures["knight"]["object"]
@@ -149,7 +144,7 @@ class HealthRecovery(AbsAction):
 
 class Entity(AbstractObj):
 
-    def __init__(self,stats,position,image):
+    def __init__(self, stats, position ,image):
         self._object = image 
         self.hit_points = 0
         self.max_hit_points = 0
