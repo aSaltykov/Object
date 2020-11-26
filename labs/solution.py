@@ -1,7 +1,17 @@
 from abc import ABC,abstractmethod
 
 
-class Game:
+class SingleTone:
+    __instance = None
+
+    def __new__(cls, name):
+        if SingleTone.__instance:
+            SingleTone.__instance = object.__new__(cls)
+        SingleTone.__instance.name = name
+        return SingleTone.__instance
+
+
+class Game(SingleTone):
     obj = []
     level = 0
     score = 0
@@ -29,7 +39,7 @@ class Game:
         pass
 
 
-class AbstractFactory(ABC):
+class AbstractKnightFactory(ABC):
 
     @abstractmethod
     def create(self):
@@ -37,6 +47,7 @@ class AbstractFactory(ABC):
     
 
 class KnightFactory(AbstractFactory):
+
     def create(self):
         obj = Lib.textures["knight"]["object"]
         return Knight(STATS, obj)
@@ -300,6 +311,4 @@ STATS = {
     "stamina": 10,
     "intellect": 5
 }
-
-
 
